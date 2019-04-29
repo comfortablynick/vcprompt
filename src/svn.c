@@ -9,12 +9,12 @@
 
 #include "../config.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <unistd.h>
 #if HAVE_SQLITE3
-# include <sqlite3.h>
+#include <sqlite3.h>
 #endif
 
 #include "common.h"
@@ -23,13 +23,13 @@
 #include <ctype.h>
 
 static int
-svn_probe(vccontext_t *context)
+svn_probe(vccontext_t* context)
 {
     return isdir(".svn");
 }
 
-static char *
-get_branch_name(char *repos_path)
+static char*
+get_branch_name(char* repos_path)
 {
     // if repos_path endswith "trunk"
     //     return "trunk"
@@ -39,8 +39,8 @@ get_branch_name(char *repos_path)
     //     no idea
 
     // if the final component is "trunk", that's where we are
-    char *slash = strrchr(repos_path, '/');
-    char *name = slash ? slash + 1 : repos_path;
+    char* slash = strrchr(repos_path, '/');
+    char* name = slash ? slash + 1 : repos_path;
     if (strcmp(name, "trunk") == 0) {
         debug("found svn trunk");
         return strdup(name);
@@ -54,7 +54,7 @@ get_branch_name(char *repos_path)
     // case 'name' points to the branch name
     *slash = 0;
     slash = strrchr(repos_path, '/');
-    char *prev = slash ? slash + 1 : repos_path;
+    char* prev = slash ? slash + 1 : repos_path;
     if (strncmp(prev, "branches", 8) == 0) {
         debug("found svn branch name: %s", name);
         return strdup(name);
@@ -66,14 +66,14 @@ get_branch_name(char *repos_path)
 
 #if HAVE_SQLITE3
 static int
-svn_read_sqlite(vccontext_t *context, result_t *result)
+svn_read_sqlite(vccontext_t* context, result_t* result)
 {
     int ok = 0;
     int retval;
-    sqlite3 *conn = NULL;
-    sqlite3_stmt *res = NULL;
-    const char *tail;
-    char * repos_path = NULL;
+    sqlite3* conn = NULL;
+    sqlite3_stmt* res = NULL;
+    const char* tail;
+    char* repos_path = NULL;
 
     retval = sqlite3_open_v2(".svn/wc.db", &conn, SQLITE_OPEN_READONLY, NULL);
     if (retval != SQLITE_OK) {
@@ -81,9 +81,9 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
         goto err;
     }
     // unclear when wc_id is anything other than 1
-    char *sql = ("select changed_revision from nodes "
+    char* sql = ("select changed_revision from nodes "
                  "where wc_id = 1 and local_relpath = ''");
-    const char *textval;
+    const char* textval;
     retval = sqlite3_prepare_v2(conn, sql, strlen(sql), &res, &tail);
     if (retval != SQLITE_OK) {
         debug("error running query: %s", sqlite3_errmsg(conn));
@@ -94,7 +94,7 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
         debug("error fetching result row: %s", sqlite3_errmsg(conn));
         goto err;
     }
-    textval = (const char *) sqlite3_column_text(res, 0);
+    textval = (const char*)sqlite3_column_text(res, 0);
     if (textval == NULL) {
         debug("could not retrieve value of nodes.changed_revision");
         goto err;
@@ -108,9 +108,7 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
         debug("error querying for repos_path: %s", sqlite3_errmsg(conn));
         goto err;
     }
-    retval = sqlite3_bind_text(res, 1,
-                               context->rel_path, strlen(context->rel_path),
-                               SQLITE_STATIC);
+    retval = sqlite3_bind_text(res, 1, context->rel_path, strlen(context->rel_path), SQLITE_STATIC);
     if (retval != SQLITE_OK) {
         debug("error binding parameter: %s", sqlite3_errmsg(conn));
         goto err;
@@ -121,7 +119,7 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
         goto err;
     }
 
-    textval = (const char *) sqlite3_column_text(res, 0);
+    textval = (const char*)sqlite3_column_text(res, 0);
     if (textval == NULL) {
         debug("could not retrieve value of nodes.repos_path");
         goto err;
@@ -131,18 +129,15 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
 
     ok = 1;
 
- err:
-    if (res != NULL)
-        sqlite3_finalize(res);
-    if (conn != NULL)
-        sqlite3_close(conn);
-    if (repos_path != NULL)
-        free(repos_path);
+err:
+    if (res != NULL) sqlite3_finalize(res);
+    if (conn != NULL) sqlite3_close(conn);
+    if (repos_path != NULL) free(repos_path);
     return ok;
 }
 #else
 static int
-svn_read_sqlite(vccontext_t *context, result_t *result)
+svn_read_sqlite(vccontext_t* context, result_t* result)
 {
     debug("vcprompt built without sqlite3 (cannot support svn >= 1.7)");
     return 0;
@@ -150,7 +145,7 @@ svn_read_sqlite(vccontext_t *context, result_t *result)
 #endif
 
 static int
-svn_read_custom(FILE *fp, char line[], int size, int line_num, result_t *result)
+svn_read_custom(FILE* fp, char line[], int size, int line_num, result_t* result)
 {
     // Caller has already read line 1. Read lines 2..5, discarding 2..4.
     while (line_num <= 5) {
@@ -164,9 +159,9 @@ svn_read_custom(FILE *fp, char line[], int size, int line_num, result_t *result)
     // Line 5 is the complete URL for the working dir (repos_root
     // + repos_path). To parse it easily, we first need the
     // repos_root from line 6.
-    char *repos_root;
+    char* repos_root;
     int root_len;
-    char *repos_path = strdup(line);
+    char* repos_path = strdup(line);
     chop_newline(repos_path);
     if (fgets(line, size, fp) == NULL) {
         debug(".svn/entries: early EOF (line %d empty)", line_num);
@@ -203,11 +198,11 @@ svn_read_custom(FILE *fp, char line[], int size, int line_num, result_t *result)
 }
 
 static int
-svn_read_xml(FILE *fp, char line[], int size, int line_num, result_t *result)
+svn_read_xml(FILE* fp, char line[], int size, int line_num, result_t* result)
 {
     char rev[100];
-    char *marker = "revision=";
-    char *p = NULL;
+    char* marker = "revision=";
+    char* p = NULL;
     while (fgets(line, size, fp)) {
         if ((p = strstr(line, marker)) != NULL) {
             break;
@@ -225,18 +220,17 @@ svn_read_xml(FILE *fp, char line[], int size, int line_num, result_t *result)
 }
 
 static result_t*
-svn_get_info(vccontext_t *context)
+svn_get_info(vccontext_t* context)
 {
-    result_t *result = init_result();
-    FILE *fp = NULL;
+    result_t* result = init_result();
+    FILE* fp = NULL;
     int ok = 0;
 
     if (access(".svn/wc.db", F_OK) == 0) {
         // SQLite file format (working copy created by svn >= 1.7)
         // Some repositories do not have the ".svn/entries" file anymore
         ok = svn_read_sqlite(context, result);
-    }
-    else {
+    } else {
         debug("cannot access() .svn/wc.db: not an svn >= 1.7 working copy");
 
         fp = fopen(".svn/entries", "r");
@@ -245,7 +239,7 @@ svn_get_info(vccontext_t *context)
             goto err;
         }
         char line[1024];
-        int line_num = 1;                   // the line we're about to read
+        int line_num = 1; // the line we're about to read
 
         if (fgets(line, sizeof(line), fp) == NULL) {
             debug(".svn/entries: empty file");
@@ -257,14 +251,13 @@ svn_get_info(vccontext_t *context)
         if (isdigit(line[0])) {
             // Custom file format (working copy created by svn >= 1.4)
             ok = svn_read_custom(fp, line, sizeof(line), line_num, result);
-        }
-        else {
+        } else {
             // XML file format (working copy created by svn < 1.4)
             ok = svn_read_xml(fp, line, sizeof(line), line_num, result);
         }
     }
 
- err:
+err:
     if (fp) {
         fclose(fp);
     }
@@ -276,7 +269,7 @@ svn_get_info(vccontext_t *context)
 }
 
 vccontext_t*
-get_svn_context(options_t *options)
+get_svn_context(options_t* options)
 {
     return init_context("svn", options, svn_probe, svn_get_info);
 }

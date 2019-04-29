@@ -11,15 +11,15 @@
 #include "common.h"
 
 #include <errno.h>
-#include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 static void
-init_dynbuf(dynbuf *dbuf, int bufsize)
+init_dynbuf(dynbuf* dbuf, int bufsize)
 {
     dbuf->size = bufsize;
     dbuf->len = 0;
@@ -28,7 +28,7 @@ init_dynbuf(dynbuf *dbuf, int bufsize)
 }
 
 static ssize_t
-read_dynbuf(int fd, dynbuf *dbuf)
+read_dynbuf(int fd, dynbuf* dbuf)
 {
     size_t avail = dbuf->size - dbuf->len;
     if (avail < 1024) {
@@ -43,50 +43,45 @@ read_dynbuf(int fd, dynbuf *dbuf)
     else if (nread == 0) {
         dbuf->buf[dbuf->len] = '\0';
         dbuf->eof = 1;
-        //debug("capture: eof on fd %d; total read = %d bytes", fd, dbuf->len);
+        // debug("capture: eof on fd %d; total read = %d bytes", fd, dbuf->len);
         return 0;
     }
-    //debug("capture: read %d bytes from child via fd %d", nread, fd);
+    // debug("capture: read %d bytes from child via fd %d", nread, fd);
     dbuf->len += nread;
     return nread;
 }
 
-capture_t *
+capture_t*
 new_capture()
 {
     int bufsize = 4096;
-    capture_t *result = malloc(sizeof(capture_t));
-    if (result == NULL)
-        goto err;
+    capture_t* result = malloc(sizeof(capture_t));
+    if (result == NULL) goto err;
     init_dynbuf(&result->childout, bufsize);
-    if (result->childout.buf == NULL)
-        goto err;
+    if (result->childout.buf == NULL) goto err;
 
     init_dynbuf(&result->childerr, bufsize);
-    if (result->childerr.buf == NULL)
-        goto err;
+    if (result->childerr.buf == NULL) goto err;
 
     return result;
 
- err:
+err:
     free_capture(result);
     return NULL;
 }
 
 void
-free_capture(capture_t *result)
+free_capture(capture_t* result)
 {
     if (result != NULL) {
-        if (result->childout.buf != NULL)
-            free(result->childout.buf);
-        if (result->childerr.buf != NULL)
-            free(result->childerr.buf);
+        if (result->childout.buf != NULL) free(result->childout.buf);
+        if (result->childerr.buf != NULL) free(result->childerr.buf);
         free(result);
     }
 }
 
 static void
-print_cmd(char *const argv[])
+print_cmd(char* const argv[])
 {
     int bufsize = 100;
     char cmd[bufsize];
@@ -101,41 +96,35 @@ print_cmd(char *const argv[])
         int arglen = strlen(argv[i]);
         /* + 4 to leave room for " ..." */
         if (offs + arglen + 4 < bufsize) {
-            strcpy(cmd+offs, argv[i]);
+            strcpy(cmd + offs, argv[i]);
             offs += arglen;
-        }
-        else {
-            strcpy(cmd+offs, "...");
+        } else {
+            strcpy(cmd + offs, "...");
             break;
         }
     }
     debug("spawning child process: %s", cmd);
 }
 
-capture_t *
-capture_child(const char *file, char *const argv[])
+capture_t*
+capture_child(const char* file, char* const argv[])
 {
     int stdout_pipe[] = {-1, -1};
     int stderr_pipe[] = {-1, -1};
-    capture_t *result = NULL;
-    if (pipe(stdout_pipe) < 0)
-        goto err;
-    if (pipe(stderr_pipe) < 0)
-        goto err;
+    capture_t* result = NULL;
+    if (pipe(stdout_pipe) < 0) goto err;
+    if (pipe(stderr_pipe) < 0) goto err;
 
-    if (debug_mode())
-        print_cmd(argv);
+    if (debug_mode()) print_cmd(argv);
     pid_t pid = fork();
     if (pid < 0) {
         goto err;
     }
-    if (pid == 0) {             /* in the child */
-        close(stdout_pipe[0]);  /* don't need the read ends of the pipes */
+    if (pid == 0) {            /* in the child */
+        close(stdout_pipe[0]); /* don't need the read ends of the pipes */
         close(stderr_pipe[0]);
-        if (dup2(stdout_pipe[1], STDOUT_FILENO) < 0)
-            _exit(1);
-        if (dup2(stderr_pipe[1], STDERR_FILENO) < 0)
-            _exit(1);
+        if (dup2(stdout_pipe[1], STDOUT_FILENO) < 0) _exit(1);
+        if (dup2(stderr_pipe[1], STDERR_FILENO) < 0) _exit(1);
 
         execvp(file, argv);
         debug("error executing %s: %s\n", file, strerror(errno));
@@ -147,8 +136,7 @@ capture_child(const char *file, char *const argv[])
     close(stderr_pipe[1]);
 
     result = new_capture();
-    if (result == NULL)
-        goto err;
+    if (result == NULL) goto err;
 
     int cstdout = stdout_pipe[0];
     int cstderr = stderr_pipe[0];
@@ -166,19 +154,17 @@ capture_child(const char *file, char *const argv[])
             FD_SET(cstderr, &child_fds);
             maxfd = cstderr;
         }
-        int numavail = select(maxfd+1, &child_fds, NULL, NULL, NULL);
+        int numavail = select(maxfd + 1, &child_fds, NULL, NULL, NULL);
         if (numavail < 0)
             goto err;
         else if (numavail == 0) /* EOF on both pipes */
             break;
 
         if (FD_ISSET(cstdout, &child_fds)) {
-            if (read_dynbuf(cstdout, &result->childout) < 0)
-                goto err;
+            if (read_dynbuf(cstdout, &result->childout) < 0) goto err;
         }
         if (FD_ISSET(cstderr, &child_fds)) {
-            if (read_dynbuf(cstderr, &result->childerr) < 0)
-                goto err;
+            if (read_dynbuf(cstderr, &result->childerr) < 0) goto err;
         }
         done = result->childout.eof && result->childerr.eof;
     }
@@ -191,26 +177,17 @@ capture_child(const char *file, char *const argv[])
     else if (WIFSIGNALED(status))
         result->signal = WTERMSIG(status);
 
-    if (result->status != 0)
-        debug("child process %s exited with status %d",
-              file, result->status);
-    if (result->signal != 0)
-        debug("child process %s killed by signal %d",
-              file, result->signal);
+    if (result->status != 0) debug("child process %s exited with status %d", file, result->status);
+    if (result->signal != 0) debug("child process %s killed by signal %d", file, result->signal);
     if (result->childerr.len > 0)
-        debug("child process %s wrote to stderr:\n%s",
-              file, result->childerr.buf);
+        debug("child process %s wrote to stderr:\n%s", file, result->childerr.buf);
 
     return result;
- err:
-    if (stdout_pipe[0] > -1)
-        close(stdout_pipe[0]);
-    if (stdout_pipe[1] > -1)
-        close(stdout_pipe[1]);
-    if (stderr_pipe[0] > -1)
-        close(stderr_pipe[0]);
-    if (stderr_pipe[1] > -1)
-        close(stderr_pipe[1]);
+err:
+    if (stdout_pipe[0] > -1) close(stdout_pipe[0]);
+    if (stdout_pipe[1] > -1) close(stdout_pipe[1]);
+    if (stderr_pipe[0] > -1) close(stderr_pipe[0]);
+    if (stderr_pipe[1] > -1) close(stderr_pipe[1]);
     free_capture(result);
     return NULL;
 }
@@ -239,25 +216,23 @@ capture_failed(capture_t *capture)
 #include <stdio.h>
 
 int
-main(int argc, char *argv[])
+main(int argc, char* argv[])
 {
     if (argc < 2) {
         fprintf(stderr, "usage: %s prog arg...\n", argv[0]);
         return 2;
     }
-    options_t options = {debug: 1};
+    options_t options = {debug : 1};
     set_options(&options);
 
-    capture_t *result = capture_child(argv[1], argv+1);
+    capture_t* result = capture_child(argv[1], argv + 1);
     int status;
     if (result == NULL) {
         perror("capture failed");
         return 1;
     }
-    printf("read %ld bytes from child stdout: >%s<\n",
-           result->childout.len, result->childout.buf);
-    printf("read %ld bytes from child stderr: >%s<\n",
-           result->childerr.len, result->childerr.buf);
+    printf("read %ld bytes from child stdout: >%s<\n", result->childout.len, result->childout.buf);
+    printf("read %ld bytes from child stderr: >%s<\n", result->childerr.len, result->childerr.buf);
     status = result->status;
     printf("child status = %d, signal =%d\n", status, result->signal);
     free_capture(result);

@@ -14,18 +14,17 @@
 #cmakedefine HAVE_SYS_STAT_H @HAVE_SYS_STAT_H@
 #cmakedefine HAVE_SYS_TYPES_H @HAVE_SYS_TYPES_H@
 
-/* TYPES */
+/* SQLITE3 */
+#cmakedefine HAVE_SQLITE3_H @HAVE_SQLITE3_H@
+#cmakedefine HAVE_LIBSQLITE3 @HAVE_LIBSQLITE3@
+#cmakedefine HAVE_SQLITE3 @HAVE_LIBSQLITE3@
 
+/* TYPES */
 #cmakedefine HAVE_MODE_T
 #cmakedefine HAVE_PID_T
 #cmakedefine HAVE_SIZE_T
 #cmakedefine HAVE_SSIZE_T
 #cmakedefine HAVE_UINT32_T
-
-/* SQLITE3 */
-#cmakedefine HAVE_SQLITE3_H @HAVE_SQLITE3_H@
-#cmakedefine HAVE_LIBSQLITE3 @HAVE_LIBSQLITE3@
-#cmakedefine HAVE_SQLITE3 @HAVE_LIBSQLITE3@
 
 /* PACKAGE INFO */
 #cmakedefine PACKAGE_NAME "@PACKAGE_NAME@"

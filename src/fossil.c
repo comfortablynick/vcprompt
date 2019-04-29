@@ -7,26 +7,26 @@
  * (at your option) any later version.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 
-#include "fossil.h"
-#include "common.h"
 #include "capture.h"
+#include "common.h"
+#include "fossil.h"
 
 static int
-fossil_probe(vccontext_t *context)
+fossil_probe(vccontext_t* context)
 {
     return isfile("_FOSSIL_") || isfile(".fslckout");
 }
 
 static result_t*
-fossil_get_info(vccontext_t *context)
+fossil_get_info(vccontext_t* context)
 {
-    result_t *result = init_result();
-    char *t;
+    result_t* result = init_result();
+    char* t;
     int tab_len = 14;
     char buf2[81];
 
@@ -35,13 +35,13 @@ fossil_get_info(vccontext_t *context)
     // enough to cover all the usual fields (note that 'comment:' can be
     // several lines long) plus eventual output indicating changes in
     // the repo.
-    char *argv[] = {"fossil", "status", NULL};
-    capture_t *capture = capture_child("fossil", argv);
+    char* argv[] = {"fossil", "status", NULL};
+    capture_t* capture = capture_child("fossil", argv);
     if (capture == NULL) {
         debug("unable to execute 'fossil status'");
         return NULL;
     }
-    char *cstdout = capture->childout.buf;
+    char* cstdout = capture->childout.buf;
 
     if (context->options->show_branch) {
         if ((t = strstr(cstdout, "\ntags:"))) {
@@ -53,8 +53,7 @@ fossil_get_info(vccontext_t *context)
             get_till_eol(buf2, t + tab_len + 1, 80);
             debug("found tag line: '%s'", buf2);
             result_set_branch(result, buf2);
-        }
-        else {
+        } else {
             debug("tag line not found in fossil output; unknown branch");
             result_set_branch(result, "(unknown)");
         }
@@ -64,8 +63,7 @@ fossil_get_info(vccontext_t *context)
             get_till_eol(buf2, t + tab_len + 1, 80);
             debug("found revision line: '%s'", buf2);
             result_set_revision(result, buf2, 12);
-        }
-        else {
+        } else {
             debug("revision line not found in fossil output; unknown revision");
             result_set_revision(result, "unknown", 7);
         }
@@ -73,14 +71,10 @@ fossil_get_info(vccontext_t *context)
     if (context->options->show_modified) {
         // This can be also done by checking if 'fossil changes'
         // prints anything, but we save a child process this way.
-        result->modified = (strstr(cstdout, "\nEDITED") ||
-                            strstr(cstdout, "\nADDED") ||
-                            strstr(cstdout, "\nDELETED") ||
-                            strstr(cstdout, "\nMISSING") ||
-                            strstr(cstdout, "\nRENAMED") ||
-                            strstr(cstdout, "\nNOT_A_FILE") ||
-                            strstr(cstdout, "\nUPDATED") ||
-                            strstr(cstdout, "\nMERGED"));
+        result->modified = (strstr(cstdout, "\nEDITED") || strstr(cstdout, "\nADDED") ||
+                            strstr(cstdout, "\nDELETED") || strstr(cstdout, "\nMISSING") ||
+                            strstr(cstdout, "\nRENAMED") || strstr(cstdout, "\nNOT_A_FILE") ||
+                            strstr(cstdout, "\nUPDATED") || strstr(cstdout, "\nMERGED"));
     }
 
     cstdout = NULL;
@@ -88,7 +82,7 @@ fossil_get_info(vccontext_t *context)
 
     if (context->options->show_unknown) {
         // This can't be read from 'fossil status' output
-        char *argv[] = {"fossil", "extra", NULL};
+        char* argv[] = {"fossil", "extra", NULL};
         capture = capture_child("fossil", argv);
         if (capture == NULL) {
             debug("unable to execute 'fossil extra'");
@@ -102,7 +96,7 @@ fossil_get_info(vccontext_t *context)
 }
 
 vccontext_t*
-get_fossil_context(options_t *options)
+get_fossil_context(options_t* options)
 {
     return init_context("fossil", options, fossil_probe, fossil_get_info);
 }

@@ -6,6 +6,7 @@ configure
 Makefile
 autom4te.cache
 /stamp-h*
+config.h
 
 # cmake
 build/

@@ -7,25 +7,25 @@
  * (at your option) any later version.
  */
 
-#include <stdlib.h>
-#include <string.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include "common.h"
 
 result_t*
 init_result()
 {
-    return (result_t*) calloc(1, sizeof(result_t));
+    return (result_t*)calloc(1, sizeof(result_t));
 }
 
 void
-free_result(result_t *result)
+free_result(result_t* result)
 {
     free(result->branch);
     free(result->revision);
@@ -37,7 +37,7 @@ free_result(result_t *result)
 static options_t* _options = NULL;
 
 void
-set_options(options_t *options)
+set_options(options_t* options)
 {
     _options = options;
 }
@@ -49,16 +49,14 @@ debug_mode()
 }
 
 int
-result_set_revision(result_t *result, const char *revision, int len)
+result_set_revision(result_t* result, const char* revision, int len)
 {
-    if (result->revision)
-        free(result->revision);
+    if (result->revision) free(result->revision);
     if (len == -1)
         result->revision = strdup(revision);
     else {
         result->revision = malloc(len + 1);
-        if (!result->revision)
-            return 0;
+        if (!result->revision) return 0;
         strncpy(result->revision, revision, len);
         result->revision[len] = 0;
     }
@@ -66,21 +64,18 @@ result_set_revision(result_t *result, const char *revision, int len)
 }
 
 int
-result_set_branch(result_t *result, const char *branch)
+result_set_branch(result_t* result, const char* branch)
 {
-    if (result->branch)
-        free(result->branch);
+    if (result->branch) free(result->branch);
     result->branch = strdup(branch);
     return !!result->branch;
 }
 
 vccontext_t*
-init_context(const char *name,
-             options_t *options,
-             int (*probe)(vccontext_t*),
+init_context(const char* name, options_t* options, int (*probe)(vccontext_t*),
              result_t* (*get_info)(vccontext_t*))
 {
-    vccontext_t *context = (vccontext_t*) calloc(1, sizeof(vccontext_t));
+    vccontext_t* context = (vccontext_t*)calloc(1, sizeof(vccontext_t));
     context->options = options;
     context->name = name;
     context->probe = probe;
@@ -89,19 +84,18 @@ init_context(const char *name,
 }
 
 void
-free_context(vccontext_t *context)
+free_context(vccontext_t* context)
 {
     free(context->rel_path);
     free(context);
 }
 
 void
-debug(char *fmt, ...)
+debug(char* fmt, ...)
 {
     va_list args;
 
-    if (!_options->debug)
-        return;
+    if (!_options->debug) return;
 
     va_start(args, fmt);
     fputs("vcprompt: debug: ", stdout);
@@ -111,7 +105,7 @@ debug(char *fmt, ...)
 }
 
 static int
-_testmode(char *name, mode_t bits, char what[])
+_testmode(char* name, mode_t bits, char what[])
 {
     struct stat statbuf;
     if (stat(name, &statbuf) < 0) {
@@ -126,21 +120,21 @@ _testmode(char *name, mode_t bits, char what[])
 }
 
 int
-isdir(char *name)
+isdir(char* name)
 {
     return _testmode(name, S_IFDIR, "directory");
 }
 
 int
-isfile(char *name)
+isfile(char* name)
 {
     return _testmode(name, S_IFREG, "regular file");
 }
 
 int
-read_first_line(char *filename, char *buf, int size)
+read_first_line(char* filename, char* buf, int size)
 {
-    FILE *file;
+    FILE* file;
 
     file = fopen(filename, "r");
     if (file == NULL) {
@@ -162,9 +156,9 @@ read_first_line(char *filename, char *buf, int size)
 }
 
 int
-read_last_line(char *filename, char *buf, int size)
+read_last_line(char* filename, char* buf, int size)
 {
-    FILE *file;
+    FILE* file;
 
     file = fopen(filename, "r");
     if (file == NULL) {
@@ -173,7 +167,8 @@ read_last_line(char *filename, char *buf, int size)
     }
 
     buf[0] = '\0';
-    while (fgets(buf, size, file));
+    while (fgets(buf, size, file))
+        ;
     fclose(file);
 
     if (!buf[0]) {
@@ -188,9 +183,9 @@ read_last_line(char *filename, char *buf, int size)
 }
 
 int
-read_file(const char *filename, char *buf, int size)
+read_file(const char* filename, char* buf, int size)
 {
-    FILE *file;
+    FILE* file;
     int readsize;
 
     file = fopen(filename, "r");
@@ -207,34 +202,32 @@ read_file(const char *filename, char *buf, int size)
 }
 
 void
-chop_newline(char *buf)
+chop_newline(char* buf)
 {
     int len = strlen(buf);
-    if (buf[len-1] == '\n')
-        buf[len-1] = '\0';
+    if (buf[len - 1] == '\n') buf[len - 1] = '\0';
 }
 
 void
-dump_hex(char *dest, const char *data, int datasize)
+dump_hex(char* dest, const char* data, int datasize)
 {
     const char HEXSTR[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                              '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     int i;
 
     for (i = 0; i < datasize; ++i) {
-        dest[i * 2] = HEXSTR[(unsigned char) data[i] >> 4];
-        dest[i * 2 + 1] = HEXSTR[(unsigned char) data[i] & 0x0f];
+        dest[i * 2] = HEXSTR[(unsigned char)data[i] >> 4];
+        dest[i * 2 + 1] = HEXSTR[(unsigned char)data[i] & 0x0f];
     }
 
     dest[i * 2] = '\0';
 }
 
 void
-get_till_eol(char *dest, const char *src, int nchars)
+get_till_eol(char* dest, const char* src, int nchars)
 {
-    char *newline = strchr(src, '\n');
-    if (newline && newline - src < nchars)
-        nchars = newline - src;
+    char* newline = strchr(src, '\n');
+    if (newline && newline - src < nchars) nchars = newline - src;
     strncpy(dest, src, nchars);
     dest[nchars] = '\0';
 }

@@ -3,18 +3,20 @@
 
 #include <sys/types.h>
 
-typedef struct {
-    size_t size;                /* bytes allocated */
-    size_t len;                 /* bytes filled */
-    char *buf;
+typedef struct
+{
+    size_t size; /* bytes allocated */
+    size_t len;  /* bytes filled */
+    char* buf;
     int eof;
 } dynbuf;
 
-typedef struct {
+typedef struct
+{
     dynbuf childout;
     dynbuf childerr;
-    int status;                 /* exit status that child passed (if any) */
-    int signal;                 /* signal that killed the child (if any) */
+    int status; /* exit status that child passed (if any) */
+    int signal; /* signal that killed the child (if any) */
 } capture_t;
 
 /* fork() and exec() a child process, capturing its entire stdout and
@@ -29,12 +31,10 @@ typedef struct {
  * capture->childerr.buf and capture->childerr.len. Caller is responsible
  * for freeing the result with free_capture().
  */
-capture_t *
-capture_child(const char *file, char *const argv[]);
+capture_t* capture_child(const char* file, char* const argv[]);
 
 /* free all resources in the object returned by capture_child() */
-void
-free_capture(capture_t *capture);
+void free_capture(capture_t* capture);
 
 #if 0
 /* return true if capture_child() failed: capture is NULL, or the
