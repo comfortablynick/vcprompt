@@ -8,6 +8,7 @@
 #   CMAKE_BUILD_TYPE
 
 if(NOT CMAKE_BUILD_TYPE)
+    message(WARNING "No build type set -- defaulting to RELEASE")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
