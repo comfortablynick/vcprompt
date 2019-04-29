@@ -1,0 +1,17 @@
+vcprompt
+
+# autoconf
+*.o
+config.*
+configure
+Makefile
+autom4te.cache
+/stamp-h*
+
+# cmake
+CMakeLists.txt
+build/
+compile_commands.json
+
+# ccls
+.ccls_cache/
