@@ -17,7 +17,7 @@
 
 
 static int
-git_probe(vccontext_t* context)
+git_probe()
 {
     return isdir(".git");
 }

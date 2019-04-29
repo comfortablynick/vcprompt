@@ -14,18 +14,17 @@
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
 
-/* TYPES */
+/* SQLITE3 */
+#define HAVE_SQLITE3_H 1
+#define HAVE_LIBSQLITE3 1
+#define HAVE_SQLITE3 1
 
+/* TYPES */
 #define HAVE_MODE_T
 #define HAVE_PID_T
 #define HAVE_SIZE_T
 #define HAVE_SSIZE_T
 #define HAVE_UINT32_T
-
-/* SQLITE3 */
-#define HAVE_SQLITE3_H 1
-#define HAVE_LIBSQLITE3 1
-#define HAVE_SQLITE3 1
 
 /* PACKAGE INFO */
 #define PACKAGE_NAME "vcprompt"

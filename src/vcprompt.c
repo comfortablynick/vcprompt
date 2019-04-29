@@ -10,6 +10,7 @@
 #include "../config.h"
 
 #include <errno.h>
+#include <getopt.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
@@ -173,7 +174,7 @@ print_result(vccontext_t* context, options_t* options, result_t* result)
                 if (result->unknown) putc('?', stdout);
                 break;
             case 'm':
-                if (result->modified) putc('+', stdout);
+                if (result->modified) putc('*', stdout);
                 break;
             case '%': /* escaped % */
                 putc('%', stdout);
@@ -244,6 +245,7 @@ probe_dirs(vccontext_t** contexts, int num_contexts)
 void
 exit_on_alarm(int sig)
 {
+    debug("exit signal received: %d", sig);
     printf("[timeout]");
     exit(1);
 }
@@ -265,8 +267,6 @@ set_alarm(unsigned int milliseconds)
 int
 main(int argc, char** argv)
 {
-    int status = 0;
-
     /* Establish a handler for SIGALRM signals.  */
     signal(SIGALRM, exit_on_alarm);
 
@@ -283,6 +283,9 @@ main(int argc, char** argv)
     parse_args(argc, argv, &options);
     if (options.show_features) {
         show_features();
+        if (options.format != NULL) {
+            free(options.format);
+        }
         return 0;
     }
     if (options.format == NULL) {
@@ -335,5 +338,4 @@ done:
     if (options.format != NULL) {
         free(options.format);
     }
-    return status;
 }

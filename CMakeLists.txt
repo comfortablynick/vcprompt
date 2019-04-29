@@ -32,7 +32,7 @@ configure_file(
     @ONLY)
 message(STATUS "Running configure - done")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -Wall -Wextra")
 message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
 
 set(SOURCE_FILES
@@ -60,6 +60,5 @@ add_executable(vcprompt-test ${SOURCE_FILES})
 target_link_libraries(vcprompt-test sqlite3)
 
 # install
-set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
-install(TARGETS vcprompt DESTINATION $ENV{HOME}/bin OPTIONAL)
-install(TARGETS vcprompt-test DESTINATION $ENV{HOME}/bin OPTIONAL)
+# install(TARGETS vcprompt DESTINATION $ENV{HOME}/bin)
+install(TARGETS vcprompt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
