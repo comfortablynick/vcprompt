@@ -60,7 +60,7 @@ void
 parse_args(int argc, char** argv, options_t* options)
 {
     int opt;
-    while ((opt = getopt(argc, argv, "hf:dt:F")) != -1) {
+    while ((opt = getopt(argc, argv, "hvf:dt:F")) != -1) {
         switch (opt) {
         case 'f':
             options->format = strdup(optarg);
@@ -74,19 +74,31 @@ parse_args(int argc, char** argv, options_t* options)
         case 'F':
             options->show_features = 1;
             break;
+        case 'v':
+            puts(PACKAGE_STRING);
+            exit(0);
+            break;
         case 'h':
         default:
-            printf("usage: %s [-h] [-d] [-t timeout_ms] [-f FORMAT]\n", argv[0]);
-            printf("FORMAT (default=\"%s\") may contain:\n%s", DEFAULT_FORMAT,
-                   "  %n  show VC name\n"
-                   "  %b  show branch\n"
-                   "  %r  show revision\n"
-                   "  %p  show patch name (MQ, guilt, ...)\n"
-                   "  %u  indicate unknown (untracked) files\n"
-                   "  %m  indicate uncommitted changes (modified/added/removed)\n"
-                   "  %%  show '%'\n");
-            printf("Environment Variables:\n"
-                   "  VCPROMPT_FORMAT\n");
+            fprintf(stderr, "usage: %s [-h] [-d] [-t timeout_ms] [-f FORMAT]\n%s", argv[0],
+                    "FLAGS:\n"
+                    "  -h  show this help message and exit\n"
+                    "  -v  show program version\n"
+                    "  -d  output debug messages to console\n"
+                    "  -F  show vcs features installed on this system\n"
+                    "ARGUMENTS:\n"
+                    "  -t  timeout threshold, in milliseconds\n"
+                    "  -f  tokenized string that determines output\n"
+                    "      %n  show VC name\n"
+                    "      %b  show branch\n"
+                    "      %r  show revision\n"
+                    "      %p  show patch name (MQ, guilt, ...)\n"
+                    "      %u  indicate unknown (untracked) files\n"
+                    "      %m  indicate uncommitted changes (modified/added/removed)\n"
+                    "      %%  show '%'"
+                    "\nENVIRONMENT:\n"
+                    "  $VCPROMPT_FORMAT  variable containing FORMAT string");
+            fprintf(stderr, " (default=\"%s\")\n", DEFAULT_FORMAT);
             exit(1);
         }
     }
@@ -95,7 +107,7 @@ parse_args(int argc, char** argv, options_t* options)
 void
 show_features(void)
 {
-    for (char** f = features; *f != NULL; f++) {
+    for (char** f = features; *f != NULL; ++f) {
         puts(*f);
     }
 }
@@ -103,8 +115,6 @@ show_features(void)
 void
 parse_format(options_t* options)
 {
-    size_t i;
-
     options->show_branch = 0;
     options->show_revision = 0;
     options->show_patch = 0;
@@ -112,13 +122,10 @@ parse_format(options_t* options)
     options->show_modified = 0;
 
     char* format = options->format;
-    size_t len = strlen(format);
-    for (i = 0; i < len; i++) {
+    for (size_t i = 0; format[i] != '\0'; ++i) {
         if (format[i] == '%') {
             i++;
             switch (format[i]) {
-            case '\0': /* at end of string: ignore */
-                break;
             case 'n': /* name of VC system */
                 break;
             case 'b':
@@ -140,7 +147,7 @@ parse_format(options_t* options)
                 break;
             default:
                 fprintf(stderr, "error: invalid format string: %%%c\n", format[i]);
-                break;
+                exit(1);
             }
         }
     }
@@ -149,27 +156,23 @@ parse_format(options_t* options)
 void
 print_result(vccontext_t* context, options_t* options, result_t* result)
 {
-    size_t i;
     char* format = options->format;
-    size_t len = strlen(format);
 
-    for (i = 0; i < len; i++) {
+    for (size_t i = 0; format[i] != '\0'; ++i) {
         if (format[i] == '%') {
             i++;
             switch (format[i]) {
-            case 0: /* end of string */
-                break;
             case 'n':
                 fputs(context->name, stdout);
                 break;
             case 'b':
-                if (result->branch != NULL) fputs(result->branch, stdout);
+                if (result->branch) fputs(result->branch, stdout);
                 break;
             case 'r':
-                if (result->revision != NULL) fputs(result->revision, stdout);
+                if (result->revision) fputs(result->revision, stdout);
                 break;
             case 'p':
-                if (result->patch != NULL) fputs(result->patch, stdout);
+                if (result->patch) fputs(result->patch, stdout);
             case 'u':
                 if (result->unknown) putc('?', stdout);
                 break;
@@ -179,7 +182,7 @@ print_result(vccontext_t* context, options_t* options, result_t* result)
             case '%': /* escaped % */
                 putc('%', stdout);
                 break;
-            default: /* %x printed as x */
+            default:
                 putc(format[i], stdout);
             }
         } else {
@@ -191,9 +194,8 @@ print_result(vccontext_t* context, options_t* options, result_t* result)
 vccontext_t*
 probe_all(vccontext_t** contexts, int num_contexts)
 {
-    int idx;
-    for (idx = 0; idx < num_contexts; idx++) {
-        vccontext_t* ctx = contexts[idx];
+    for (int i = 0; i < num_contexts; ++i) {
+        vccontext_t* ctx = contexts[i];
         if (ctx->probe(ctx)) {
             return ctx;
         }
@@ -216,7 +218,7 @@ probe_dirs(vccontext_t** contexts, int num_contexts)
     vccontext_t* context = NULL;
     while (1) {
         context = probe_all(contexts, num_contexts);
-        if (context != NULL) {
+        if (context) {
             break;
         }
         if (rel_path == start_dir + 1) {
@@ -233,7 +235,7 @@ probe_dirs(vccontext_t** contexts, int num_contexts)
             rel_path--;
         } while (rel_path > start_dir && rel_path[-1] != '/');
     }
-    if (context != NULL) {
+    if (context) {
         debug("found a context: %s (rel_path=%s)", context->name, rel_path);
         context->rel_path = strdup(rel_path);
     }
@@ -283,14 +285,16 @@ main(int argc, char** argv)
     parse_args(argc, argv, &options);
     if (options.show_features) {
         show_features();
-        if (options.format != NULL) {
+        if (options.format) {
             free(options.format);
         }
         return 0;
     }
-    if (options.format == NULL) {
+    if (!options.format) {
         char* format = getenv("VCPROMPT_FORMAT");
-        if (format == NULL) format = DEFAULT_FORMAT;
+        if (!format) {
+            format = DEFAULT_FORMAT;
+        }
         options.format = strdup(format);
     }
 
@@ -332,7 +336,7 @@ main(int argc, char** argv)
     }
 
 done:
-    for (int i = 0; i < num_contexts; i++) {
+    for (int i = 0; i < num_contexts; ++i) {
         free_context(contexts[i]);
     }
     if (options.format != NULL) {
