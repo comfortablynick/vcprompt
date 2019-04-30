@@ -9,7 +9,7 @@ project (
     HOMEPAGE_URL "github.com/comfortablynick/vcprompt"
     LANGUAGES C)
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Release)
 include(cmake/safeguards.cmake)
 
 # print cmake/system details
@@ -56,9 +56,9 @@ set(SOURCE_FILES
 add_executable(vcprompt ${SOURCE_FILES})
 target_link_libraries(vcprompt sqlite3)
 
-add_executable(vcprompt-test ${SOURCE_FILES})
-target_link_libraries(vcprompt-test sqlite3)
+add_executable(vctest ${SOURCE_FILES})
+target_link_libraries(vctest sqlite3)
 
 # install
 # install(TARGETS vcprompt DESTINATION $ENV{HOME}/bin)
-install(TARGETS vcprompt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+install(TARGETS vctest DESTINATION $ENV{HOME}/bin)

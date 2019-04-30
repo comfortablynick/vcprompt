@@ -98,9 +98,9 @@ debug(char* fmt, ...)
     if (!_options->debug) return;
 
     va_start(args, fmt);
-    fputs("vcprompt: debug: ", stdout);
-    vfprintf(stdout, fmt, args);
-    fputc('\n', stdout);
+    fputs("vcprompt: debug: ", stderr);
+    vfprintf(stderr, fmt, args);
+    fputc('\n', stderr);
     va_end(args);
 }
 
