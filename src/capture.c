@@ -58,10 +58,10 @@ new_capture()
     capture_t* result = malloc(sizeof(capture_t));
     if (result == NULL) goto err;
     init_dynbuf(&result->childout, bufsize);
-    if (result->childout.buf == NULL) goto err;
+    if (!result->childout.buf) goto err;
 
     init_dynbuf(&result->childerr, bufsize);
-    if (result->childerr.buf == NULL) goto err;
+    if (!result->childerr.buf) goto err;
 
     return result;
 
@@ -75,7 +75,6 @@ free_capture(capture_t* result)
 {
     if (result != NULL) {
         if (result->childout.buf != NULL) free(result->childout.buf);
-        if (result->childerr.buf != NULL) free(result->childerr.buf);
         free(result);
     }
 }
@@ -86,9 +85,8 @@ print_cmd(char* const argv[])
     int bufsize = 100;
     char cmd[bufsize];
     int offs = 0;
-    int i;
 
-    for (i = 0; argv[i] != NULL; i++) {
+    for (size_t i = 0; argv[i]; ++i) {
         if (i > 0 && offs + 1 < bufsize) {
             cmd[offs++] = ' ';
             cmd[offs] = '\0';

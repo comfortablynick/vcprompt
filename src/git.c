@@ -68,12 +68,12 @@ git_get_info(vccontext_t* context)
         argv[3] = "--untracked-files=no";
     }
     capture_t* capture = capture_child("git", argv);
-    if (capture == NULL) {
+    if (!capture) {
         debug("unable to execute 'git status'");
         goto err;
     }
     char* cstdout = capture->childout.buf;
-    for (char* ch = cstdout; *ch != 0; ch++) {
+    for (char* ch = cstdout; *ch; ++ch) {
         if (ch == cstdout || *(ch - 1) == '\n') {
             // at start of output or start of line: look for ?, M, etc.
             if (context->options->show_unknown && *ch == '?') {
@@ -86,7 +86,6 @@ git_get_info(vccontext_t* context)
 
     cstdout = NULL;
     free_capture(capture);
-
     return result;
 
 err:

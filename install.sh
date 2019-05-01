@@ -6,7 +6,7 @@ mkdir build && cd build || exit 1
 
 # build
 cmake ..
-make install vcprompt
+make install
 
 # link compile_commands.json for source code completion
 if [ -f compile_commands.json ]; then

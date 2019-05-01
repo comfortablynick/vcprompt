@@ -6,6 +6,7 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  */
+#include <stdio.h>
 
 #ifndef VCPROMPT_H
 #define VCPROMPT_H
@@ -79,6 +80,12 @@ void free_result(result_t*);
  * debug mode is on (e.g. from the command line -d).
  */
 void debug(char* fmt, ...);
+
+/* Copy string src to buffer dst of size dsize.  At most dsize-1
+ * chars will be copied.  Always NUL terminates (unless dsize == 0).
+ * Returns strlen(src); if retval >= dsize, truncation occurred.
+ */
+size_t strcpy_s(char* dst, const char* src, size_t dsize);
 
 /* stat() the specified file and return true if it is a directory, false
  * if stat() failed or it is not a directory.
