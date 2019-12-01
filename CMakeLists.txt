@@ -51,7 +51,7 @@ set(SOURCE_FILES
 
 # install add_executable(vcprompt ${SOURCE_FILES})
 # target_link_libraries(vcprompt sqlite3) install(TARGETS vcprompt DESTINATION
-# $ENV{HOME}/bin)
+# $ENV{HOME}/.local/bin)
 
 # renamed executable (no conflict with original vcprompt)
 set(MAIN_TARGET_NAME "vctest")
@@ -59,4 +59,4 @@ add_executable(${MAIN_TARGET_NAME} ${SOURCE_FILES})
 target_link_libraries(vctest sqlite3)
 
 include(cmake/iwyu.cmake)
-install(TARGETS vctest DESTINATION $ENV{HOME}/bin)
+install(TARGETS vctest DESTINATION $ENV{HOME}/.local/bin)
