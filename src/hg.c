@@ -297,6 +297,7 @@ hg_get_info(vccontext_t* context)
 
     if (context->options->show_modified || context->options->show_unknown) {
         int status = system(context->options->show_unknown ? "vcprompt-hgst -u" : "vcprompt-hgst");
+        debug("vcprompt-hgst exit status: %d", WEXITSTATUS(status));
         if (WEXITSTATUS(status) <= 3) {
             if (WEXITSTATUS(status) & 1 << 0) result->modified = 1;
             if (WEXITSTATUS(status) & 1 << 1) result->unknown = 1;

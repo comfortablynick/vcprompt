@@ -8,6 +8,7 @@ project(${PROJECT_NAME}
         HOMEPAGE_URL "github.com/comfortablynick/vcprompt"
         LANGUAGES C)
 
+set(BIN_DIR $ENV{HOME}/.local/bin)
 set(CMAKE_BUILD_TYPE Release)
 include(cmake/build_safeguards.cmake)
 
@@ -49,14 +50,12 @@ set(SOURCE_FILES
     src/capture.h
     src/capture.c)
 
-# install add_executable(vcprompt ${SOURCE_FILES})
-# target_link_libraries(vcprompt sqlite3) install(TARGETS vcprompt DESTINATION
-# $ENV{HOME}/.local/bin)
-
 # renamed executable (no conflict with original vcprompt)
 set(MAIN_TARGET_NAME "vctest")
+configure_file("${PROJECT_SOURCE_DIR}/vcprompt-hgst" ${BIN_DIR} COPYONLY)
+
 add_executable(${MAIN_TARGET_NAME} ${SOURCE_FILES})
 target_link_libraries(vctest sqlite3)
 
 include(cmake/iwyu.cmake)
-install(TARGETS vctest DESTINATION $ENV{HOME}/.local/bin)
+install(TARGETS ${MAIN_TARGET_NAME} DESTINATION $ENV{HOME}/.local/bin)
