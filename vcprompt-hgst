@@ -1,18 +1,18 @@
 #!/usr/bin/perl
 # Author: Alex Efros <powerman-asdf@yandex.ru>, 2012
 # License: Public Domain
-# 
+#
 # vcprompt-hgst: fast `hg st` replacement for vcprompt
-# 
+#
 # This script should be executed in root directory of Mercurial repository.
-# 
+#
 # In some cases false detection of modified files will happens (when
 # .hg/dirstate cache outdated), this can be fixed by updating cache (for
 # ex. by running real `hg st`).
-# 
+#
 # Options:
 #   -u      detect unknown files
-# 
+#
 # Exit codes:
 #   0 - no modified or unknown files detected
 #   1 - modified files detected
@@ -42,7 +42,7 @@ if (open my $f, '<', '.hgignore') {
         if ($is_glob) {
             my $re = q{};
             my $in_paren = 0;
-            while (/\G([^\{\}\[]*)|\G({)|\G(})|\G\[([^\]]*)\]/gms) {
+            while (/\G([^\{\}\[]*)|\G(\{)|\G(})|\G\[([^\]]*)\]/gms) {
                 my ($text, $open_paren, $close_paren, $set) = ($1, $2, $3, $4);
                 if (defined $open_paren) {
                     $in_paren = 1;
