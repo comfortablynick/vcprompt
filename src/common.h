@@ -24,6 +24,7 @@ typedef struct
     int show_modified;    /* show + if local changes? */
     unsigned int timeout; /* timeout in milliseconds */
     int show_features;    /* list builtin features */
+    char* directory;      /* directory to check if not cwd */
 } options_t;
 
 /* What we figured out by analyzing the working dir: info that

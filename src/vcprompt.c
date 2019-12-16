@@ -80,7 +80,8 @@ parse_args(int argc, char** argv, options_t* options)
             break;
         case 'h':
         default:
-            fprintf(stderr, "usage: %s [-h] [-d] [-t timeout_ms] [-f FORMAT]\n%s", argv[0],
+            fprintf(stderr, "usage: %s [-h] [-d] [-t timeout_ms] [-f FORMAT] <DIRECTORY>\n%s",
+                    argv[0],
                     "FLAGS:\n"
                     "  -h  show this help message and exit\n"
                     "  -v  show program version\n"
@@ -102,6 +103,7 @@ parse_args(int argc, char** argv, options_t* options)
             exit(1);
         }
     }
+    if (argv[optind] != NULL) options->directory = argv[optind];
 }
 
 void
@@ -275,6 +277,7 @@ main(int argc, char** argv)
     options_t options = {
         .debug = 0,
         .format = NULL,
+        .directory = NULL,
         .show_branch = 0,
         .show_revision = 0,
         .show_unknown = 0,
@@ -296,6 +299,11 @@ main(int argc, char** argv)
             format = DEFAULT_FORMAT;
         }
         options.format = strdup(format);
+    }
+    if (options.directory) {
+        if (-1 == chdir(options.directory)) {
+            debug("chdir to \"%s\" failed: %s", options.directory, strerror(errno));
+        }
     }
 
     parse_format(&options);
