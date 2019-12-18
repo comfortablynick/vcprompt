@@ -9,7 +9,6 @@ project(${PROJECT_NAME}
         LANGUAGES C)
 
 set(BIN_DIR $ENV{HOME}/.local/bin)
-set(CMAKE_BUILD_TYPE Release)
 include(cmake/build_safeguards.cmake)
 
 # print cmake/system details
@@ -17,6 +16,7 @@ message(STATUS "CMake version:    ${CMAKE_SYSTEM_VERSION}")
 message(STATUS "Compiler:         ${CMAKE_CXX_COMPILER}")
 message(STATUS "Operating System: ${CMAKE_SYSTEM}")
 message(STATUS "Processor:        ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message(STATUS "Build Type:       ${CMAKE_BUILD_TYPE}")
 
 # compile
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -30,7 +30,7 @@ configure_file("${PROJECT_SOURCE_DIR}/cmake/config.h.cmake"
                "${PROJECT_SOURCE_DIR}/config.h" @ONLY)
 message(STATUS "Running configure - done")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -Wall -Wextra")
+string(APPEND CMAKE_C_FLAGS " --std=gnu11 -Wall -Wextra")
 message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
 
 set(SOURCE_FILES
@@ -55,6 +55,7 @@ set(MAIN_TARGET_NAME "vctest")
 configure_file("${PROJECT_SOURCE_DIR}/vcprompt-hgst" ${BIN_DIR} COPYONLY)
 
 add_executable(${MAIN_TARGET_NAME} ${SOURCE_FILES})
+target_compile_options(vctest PUBLIC -g)
 target_link_libraries(vctest sqlite3)
 
 include(cmake/iwyu.cmake)

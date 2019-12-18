@@ -12,7 +12,7 @@ build:
     mkdir -p build && cd build || exit 1
 
     # build
-    cmake .. -DCMAKE_BUILD_TYPE="${1:-RelWithDebInfo}" #sh
+    cmake .. -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-RelWithDebInfo}" #sh
 
 install: build
     #!/usr/bin/env bash
@@ -34,3 +34,11 @@ install: build
 
 run:
     ./build/{{bin_name}}
+
+# run valgrind to check for memory leaks
+check:
+    valgrind --leak-check=full \
+             --show-leak-kinds=all \
+             --track-origins=yes \
+             --verbose \
+             ./build/{{bin_name}}

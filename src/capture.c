@@ -75,6 +75,7 @@ free_capture(capture_t* result)
 {
     if (result != NULL) {
         if (result->childout.buf != NULL) free(result->childout.buf);
+        if (result->childerr.buf != NULL) free(result->childerr.buf);
         free(result);
     }
 }

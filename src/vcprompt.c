@@ -175,14 +175,12 @@ print_result(vccontext_t* context, options_t* options, result_t* result)
                 break;
             case 'p':
                 if (result->patch) fputs(result->patch, stdout);
+                break;
             case 'u':
                 if (result->unknown) putc('?', stdout);
                 break;
             case 'm':
                 if (result->modified) putc('*', stdout);
-                break;
-            case '%': /* escaped % */
-                putc('%', stdout);
                 break;
             default:
                 putc(format[i], stdout);
@@ -218,7 +216,7 @@ probe_dirs(vccontext_t** contexts, int num_contexts)
     char* rel_path = start_dir + strlen(start_dir);
 
     vccontext_t* context = NULL;
-    while (1) {
+    for (;;) {
         context = probe_all(contexts, num_contexts);
         if (context) {
             break;
