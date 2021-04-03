@@ -14,3 +14,5 @@ compile_commands.json
 
 # ccls
 .ccls-cache/
+zig-cache/
+.xmake/
