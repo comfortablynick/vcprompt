@@ -1,4 +1,4 @@
-/* clang */
--std=gnu99
+clang
+%c -std=c17
 -Wall
 -Wextra

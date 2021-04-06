@@ -1,0 +1,86 @@
+; vim:set fenc=utf-8 ft=dosini:
+; written with just2tasks: Tue Apr  6 15:23:28 2021
+
+[build]
+command=just build
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; alias for `build`
+[b]
+command=just b
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; alias for `build`
+[file-build]
+command=just file-build
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; run valgrind to check for memory leaks
+[check]
+command=just check
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+[clean]
+command=just clean
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+[install]
+command=just install
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; alias for `install`
+[i]
+command=just i
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+[run]
+command=just run
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; alias for `run`
+[file-run]
+command=just file-run
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+; alias for `run`
+[r]
+command=just r
+cwd=<root>
+output=terminal
+pos=right
+save=1
+
+[run-binary]
+command=just run-binary
+cwd=<root>
+output=terminal
+pos=right
+save=1
+

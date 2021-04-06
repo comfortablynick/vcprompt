@@ -31,7 +31,7 @@
 #include "bzr.h"
 */
 
-static char* features[] = {
+static char *features[] = {
     /* Some version control systems don't change their working copy
        format every couple of versions (or they are just
        unmaintained), so we don't need versioned feature strings. */
@@ -56,8 +56,7 @@ static char* features[] = {
 
 #define DEFAULT_FORMAT "[%n:%b] "
 
-void
-parse_args(int argc, char** argv, options_t* options)
+void parse_args(int argc, char **argv, options_t *options)
 {
     int opt;
     while ((opt = getopt(argc, argv, "hvf:dt:F")) != -1) {
@@ -106,16 +105,14 @@ parse_args(int argc, char** argv, options_t* options)
     if (argv[optind] != NULL) options->directory = argv[optind];
 }
 
-void
-show_features(void)
+void show_features(void)
 {
-    for (char** f = features; *f != NULL; ++f) {
+    for (char **f = features; *f != NULL; ++f) {
         puts(*f);
     }
 }
 
-void
-parse_format(options_t* options)
+void parse_format(options_t *options)
 {
     options->show_branch = 0;
     options->show_revision = 0;
@@ -123,11 +120,10 @@ parse_format(options_t* options)
     options->show_unknown = 0;
     options->show_modified = 0;
 
-    char* format = options->format;
-    for (size_t i = 0; format[i] != '\0'; ++i) {
-        if (format[i] == '%') {
-            i++;
-            switch (format[i]) {
+    for (char *fmt = options->format; *fmt; ++fmt) {
+        if (*fmt == '%') {
+            ++fmt;
+            switch (*fmt) {
             case 'n': /* name of VC system */
                 break;
             case 'b':
@@ -148,22 +144,22 @@ parse_format(options_t* options)
             case '%':
                 break;
             default:
-                fprintf(stderr, "error: invalid format string: %%%c\n", format[i]);
+                fprintf(stderr, "error: invalid format string token: %%%c\n", *fmt);
                 exit(1);
             }
         }
     }
 }
 
-void
-print_result(vccontext_t* context, options_t* options, result_t* result)
+void print_result(vccontext_t *context, options_t *options, result_t *result)
 {
-    char* format = options->format;
+    // char buf[BUFSIZ];
+    // setbuf(stdout, buf);
 
-    for (size_t i = 0; format[i] != '\0'; ++i) {
-        if (format[i] == '%') {
-            i++;
-            switch (format[i]) {
+    for (char *fmt = options->format; *fmt; ++fmt) {
+        if (*fmt == '%') {
+            ++fmt;
+            switch (*fmt) {
             case 'n':
                 fputs(context->name, stdout);
                 break;
@@ -183,19 +179,19 @@ print_result(vccontext_t* context, options_t* options, result_t* result)
                 if (result->modified) putc('*', stdout);
                 break;
             default:
-                putc(format[i], stdout);
+                putc(*fmt, stdout);
             }
         } else {
-            putc(format[i], stdout);
+            putc(*fmt, stdout);
         }
     }
+    fflush(stdout);
 }
 
-vccontext_t*
-probe_all(vccontext_t** contexts, int num_contexts)
+vccontext_t *probe_all(vccontext_t **contexts, int num_contexts)
 {
     for (int i = 0; i < num_contexts; ++i) {
-        vccontext_t* ctx = contexts[i];
+        vccontext_t *ctx = contexts[i];
         if (ctx->probe(ctx)) {
             return ctx;
         }
@@ -204,18 +200,17 @@ probe_all(vccontext_t** contexts, int num_contexts)
 }
 
 /* walk up the directory tree until the probes work or we hit / */
-vccontext_t*
-probe_dirs(vccontext_t** contexts, int num_contexts)
+vccontext_t *probe_dirs(vccontext_t **contexts, int num_contexts)
 {
-    char* start_dir = malloc(PATH_MAX);
+    char *start_dir = malloc(PATH_MAX);
     if (getcwd(start_dir, PATH_MAX) == NULL) {
         debug("getcwd() failed: %s", strerror(errno));
         free(start_dir);
         return NULL;
     }
-    char* rel_path = start_dir + strlen(start_dir);
+    char *rel_path = start_dir + strlen(start_dir);
 
-    vccontext_t* context = NULL;
+    vccontext_t *context = NULL;
     for (;;) {
         context = probe_all(contexts, num_contexts);
         if (context) {
@@ -244,16 +239,14 @@ probe_dirs(vccontext_t** contexts, int num_contexts)
 }
 
 /* The signal handler just clears the flag and re-enables itself.  */
-void
-exit_on_alarm(int sig)
+void exit_on_alarm(int sig)
 {
     debug("exit signal received: %d", sig);
     printf("[timeout]");
     exit(1);
 }
 
-unsigned int
-set_alarm(unsigned int milliseconds)
+unsigned int set_alarm(unsigned int milliseconds)
 {
     struct itimerval old, new;
     new.it_interval.tv_usec = 0;
@@ -266,8 +259,7 @@ set_alarm(unsigned int milliseconds)
         return old.it_value.tv_sec;
 }
 
-int
-main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     /* Establish a handler for SIGALRM signals.  */
     signal(SIGALRM, exit_on_alarm);
@@ -292,7 +284,7 @@ main(int argc, char** argv)
         return 0;
     }
     if (!options.format) {
-        char* format = getenv("VCPROMPT_FORMAT");
+        char *format = getenv("VCPROMPT_FORMAT");
         if (!format) {
             format = DEFAULT_FORMAT;
         }
@@ -314,15 +306,15 @@ main(int argc, char** argv)
         debug("will never timeout");
     }
 
-    vccontext_t* contexts[] = {
+    vccontext_t *contexts[] = {
         /* ordered by popularity, so the common case is fast */
         get_git_context(&options), get_hg_context(&options),     get_svn_context(&options),
         get_cvs_context(&options), get_fossil_context(&options),
     };
-    int num_contexts = sizeof(contexts) / sizeof(vccontext_t*);
+    int num_contexts = sizeof(contexts) / sizeof(vccontext_t *);
 
-    result_t* result = NULL;
-    vccontext_t* context = NULL;
+    result_t *result = NULL;
+    vccontext_t *context = NULL;
 
     /* Starting in the current dir, walk up the directory tree until
        someone claims that this is a working copy. */

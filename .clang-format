@@ -1,9 +1,10 @@
+---
 IndentWidth: 4
 ColumnLimit: 100
 UseTab: Never
-AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlwaysBreakAfterReturnType: None
 MaxEmptyLinesToKeep: 2
-PointerAlignment: Left
+PointerAlignment: Right
 SortIncludes: true
 AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
