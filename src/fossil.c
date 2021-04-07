@@ -16,17 +16,12 @@
 #include "common.h"
 #include "fossil.h"
 
-static int
-fossil_probe(vccontext_t* context)
-{
-    return isfile("_FOSSIL_") || isfile(".fslckout");
-}
+static int fossil_probe(vccontext_t *context) { return isfile("_FOSSIL_") || isfile(".fslckout"); }
 
-static result_t*
-fossil_get_info(vccontext_t* context)
+static result_t *fossil_get_info(vccontext_t *context)
 {
-    result_t* result = init_result();
-    char* t;
+    result_t *result = init_result();
+    char *t;
     int tab_len = 14;
     char buf2[81];
 
@@ -35,13 +30,13 @@ fossil_get_info(vccontext_t* context)
     // enough to cover all the usual fields (note that 'comment:' can be
     // several lines long) plus eventual output indicating changes in
     // the repo.
-    char* argv[] = {"fossil", "status", NULL};
-    capture_t* capture = capture_child("fossil", argv);
+    char *argv[] = {"fossil", "status", NULL};
+    capture_t *capture = capture_child("fossil", argv);
     if (capture == NULL) {
         debug("unable to execute 'fossil status'");
         return NULL;
     }
-    char* cstdout = capture->childout.buf;
+    char *cstdout = capture->childout.buf;
 
     if (context->options->show_branch) {
         if ((t = strstr(cstdout, "\ntags:"))) {
@@ -82,7 +77,7 @@ fossil_get_info(vccontext_t* context)
 
     if (context->options->show_unknown) {
         // This can't be read from 'fossil status' output
-        char* argv[] = {"fossil", "extra", NULL};
+        char *argv[] = {"fossil", "extra", NULL};
         capture = capture_child("fossil", argv);
         if (capture == NULL) {
             debug("unable to execute 'fossil extra'");
@@ -95,8 +90,7 @@ fossil_get_info(vccontext_t* context)
     return result;
 }
 
-vccontext_t*
-get_fossil_context(options_t* options)
+vccontext_t *get_fossil_context(options_t *options)
 {
     return init_context("fossil", options, fossil_probe, fossil_get_info);
 }

@@ -62,7 +62,7 @@ void parse_args(int argc, char **argv, options_t *options)
     while ((opt = getopt(argc, argv, "hvf:dt:F")) != -1) {
         switch (opt) {
         case 'f':
-            options->format = strdup(optarg);
+            options->format = vcstrdup(optarg);
             break;
         case 'd':
             options->debug = 1;
@@ -232,7 +232,7 @@ vccontext_t *probe_dirs(vccontext_t **contexts, int num_contexts)
     }
     if (context) {
         debug("found a context: %s (rel_path=%s)", context->name, rel_path);
-        context->rel_path = strdup(rel_path);
+        context->rel_path = vcstrdup(rel_path);
     }
     free(start_dir);
     return context;
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
         if (!format) {
             format = DEFAULT_FORMAT;
         }
-        options.format = strdup(format);
+        options.format = vcstrdup(format);
     }
     if (options.directory) {
         if (-1 == chdir(options.directory)) {

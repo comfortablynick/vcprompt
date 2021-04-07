@@ -18,8 +18,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-static void
-init_dynbuf(dynbuf* dbuf, int bufsize)
+static void init_dynbuf(dynbuf *dbuf, int bufsize)
 {
     dbuf->size = bufsize;
     dbuf->len = 0;
@@ -27,8 +26,7 @@ init_dynbuf(dynbuf* dbuf, int bufsize)
     dbuf->eof = 0;
 }
 
-static ssize_t
-read_dynbuf(int fd, dynbuf* dbuf)
+static ssize_t read_dynbuf(int fd, dynbuf *dbuf)
 {
     size_t avail = dbuf->size - dbuf->len;
     if (avail < 1024) {
@@ -51,11 +49,10 @@ read_dynbuf(int fd, dynbuf* dbuf)
     return nread;
 }
 
-capture_t*
-new_capture()
+capture_t *new_capture()
 {
     int bufsize = 4096;
-    capture_t* result = malloc(sizeof(capture_t));
+    capture_t *result = malloc(sizeof(capture_t));
     if (result == NULL) goto err;
     init_dynbuf(&result->childout, bufsize);
     if (!result->childout.buf) goto err;
@@ -70,8 +67,7 @@ err:
     return NULL;
 }
 
-void
-free_capture(capture_t* result)
+void free_capture(capture_t *result)
 {
     if (result != NULL) {
         if (result->childout.buf != NULL) free(result->childout.buf);
@@ -80,8 +76,7 @@ free_capture(capture_t* result)
     }
 }
 
-static void
-print_cmd(char* const argv[])
+static void print_cmd(char *const argv[])
 {
     int bufsize = 100;
     char cmd[bufsize];
@@ -105,12 +100,11 @@ print_cmd(char* const argv[])
     debug("spawning child process: %s", cmd);
 }
 
-capture_t*
-capture_child(const char* file, char* const argv[])
+capture_t *capture_child(const char *file, char *const argv[])
 {
     int stdout_pipe[] = {-1, -1};
     int stderr_pipe[] = {-1, -1};
-    capture_t* result = NULL;
+    capture_t *result = NULL;
     if (pipe(stdout_pipe) < 0) goto err;
     if (pipe(stderr_pipe) < 0) goto err;
 
@@ -214,8 +208,7 @@ capture_failed(capture_t *capture)
 #ifdef TEST_CAPTURE
 #include <stdio.h>
 
-int
-main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 2) {
         fprintf(stderr, "usage: %s prog arg...\n", argv[0]);
@@ -224,7 +217,7 @@ main(int argc, char* argv[])
     options_t options = {debug : 1};
     set_options(&options);
 
-    capture_t* result = capture_child(argv[1], argv + 1);
+    capture_t *result = capture_child(argv[1], argv + 1);
     int status;
     if (result == NULL) {
         perror("capture failed");

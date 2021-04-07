@@ -7,7 +7,7 @@ typedef struct
 {
     size_t size; /* bytes allocated */
     size_t len;  /* bytes filled */
-    char* buf;
+    char *buf;
     int eof;
 } dynbuf;
 
@@ -31,10 +31,10 @@ typedef struct
  * capture->childerr.buf and capture->childerr.len. Caller is responsible
  * for freeing the result with free_capture().
  */
-capture_t* capture_child(const char* file, char* const argv[]);
+capture_t *capture_child(const char *file, char *const argv[]);
 
 /* free all resources in the object returned by capture_child() */
-void free_capture(capture_t* capture);
+void free_capture(capture_t *capture);
 
 #if 0
 /* return true if capture_child() failed: capture is NULL, or the

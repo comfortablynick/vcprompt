@@ -27,15 +27,10 @@
 
 #define NODEID_LEN 20
 
-static int
-hg_probe(vccontext_t* context)
-{
-    return isdir(".hg");
-}
+static int hg_probe(vccontext_t *context) { return isdir(".hg"); }
 
 /* return true if data contains any non-zero bytes */
-static int
-non_zero(const unsigned char* data, int size)
+static int non_zero(const unsigned char *data, int size)
 {
     int i;
     for (i = 0; i < size; i++) {
@@ -44,8 +39,7 @@ non_zero(const unsigned char* data, int size)
     return 0;
 }
 
-static int
-is_revlog_inlined(FILE* rlfile)
+static int is_revlog_inlined(FILE *rlfile)
 {
     const unsigned int REVLOGNGINLINEDATA = 1 << 16;
     int revlog_ver;
@@ -67,15 +61,14 @@ typedef struct
 } csinfo_t;
 
 //! get changeset info for the specified nodeid
-static csinfo_t
-get_csinfo(const char* nodeid)
+static csinfo_t get_csinfo(const char *nodeid)
 {
     // only supports RevlogNG. See mercurial/parsers.c for details.
-    const char* REVLOG_FILENAME = ".hg/store/00changelog.i";
+    const char *REVLOG_FILENAME = ".hg/store/00changelog.i";
     const size_t ENTRY_LEN = 64, COMP_LEN_OFS = 8, NODEID_OFS = 32;
 
     char buf[ENTRY_LEN];
-    FILE* rlfile;
+    FILE *rlfile;
     int inlined;
     csinfo_t csinfo = {"", -1, 0};
     int i;
@@ -104,7 +97,7 @@ get_csinfo(const char* nodeid)
             break;
         }
 
-        comp_len = ntohl(*((uint32_t*)(buf + COMP_LEN_OFS)));
+        comp_len = ntohl(*((uint32_t *)(buf + COMP_LEN_OFS)));
         if (memcmp(nodeid, buf + NODEID_OFS, NODEID_LEN) == 0) {
             memcpy(csinfo.nodeid, buf + NODEID_OFS, NODEID_LEN);
             csinfo.rev = i; // FIXME
@@ -118,11 +111,10 @@ get_csinfo(const char* nodeid)
     return csinfo;
 }
 
-static size_t
-put_nodeid(char* dest, const char* nodeid)
+static size_t put_nodeid(char *dest, const char *nodeid)
 {
     const size_t SHORT_NODEID_LEN = 6; // size in binary repr
-    char* p = dest;
+    char *p = dest;
 
     csinfo_t csinfo = get_csinfo(nodeid);
     if (csinfo.rev >= 0) {
@@ -134,12 +126,11 @@ put_nodeid(char* dest, const char* nodeid)
     return p - dest;
 }
 
-static void
-read_parents(vccontext_t* context, result_t* result)
+static void read_parents(vccontext_t *context, result_t *result)
 {
     if (!context->options->show_revision && !context->options->show_patch) return;
 
-    char* parent_nodes; /* two binary changeset IDs */
+    char *parent_nodes; /* two binary changeset IDs */
     size_t readsize;
 
     parent_nodes = malloc(NODEID_LEN * 2);
@@ -157,15 +148,15 @@ read_parents(vccontext_t* context, result_t* result)
 
     readsize = read_file(".hg/dirstate", parent_nodes, NODEID_LEN * 2);
     char destbuf[1024] = {'\0'};
-    char* p = destbuf;
+    char *p = destbuf;
 
     // first parent
-    if (non_zero((unsigned char*)parent_nodes, NODEID_LEN)) {
+    if (non_zero((unsigned char *)parent_nodes, NODEID_LEN)) {
         p += put_nodeid(p, parent_nodes);
     }
 
     // second parent
-    if (non_zero((unsigned char*)parent_nodes + NODEID_LEN, NODEID_LEN)) {
+    if (non_zero((unsigned char *)parent_nodes + NODEID_LEN, NODEID_LEN)) {
         *p++ = ',';
         p += put_nodeid(p, parent_nodes + NODEID_LEN);
     }
@@ -173,8 +164,7 @@ read_parents(vccontext_t* context, result_t* result)
     result_set_revision(result, destbuf, -1);
 }
 
-static void
-read_patch_name(vccontext_t* context, result_t* result)
+static void read_patch_name(vccontext_t *context, result_t *result)
 {
     if (!context->options->show_patch) return;
 
@@ -182,14 +172,14 @@ read_patch_name(vccontext_t* context, result_t* result)
     static const char status_fmt[] = ".hg/patches-%s/status";
 
     struct stat statbuf;
-    char* status_fn = NULL;
-    char* last_line = NULL;
+    char *status_fn = NULL;
+    char *last_line = NULL;
 
     if (stat(".hg/patches.queues", &statbuf) == 0) {
         /* The name of the current patch queue cannot possibly be
            longer than the name of all patch queues concatenated. */
         size_t max_qname = (size_t)statbuf.st_size;
-        char* qname = malloc(max_qname + 1);
+        char *qname = malloc(max_qname + 1);
         int ok = read_first_line(".hg/patches.queue", qname, max_qname);
         if (ok && strlen(qname) > 0) {
             debug("read queue name from .hg/patches.queue: '%s'", qname);
@@ -202,7 +192,7 @@ read_patch_name(vccontext_t* context, result_t* result)
     /* Failed to read patches.queues and/or patches.queue: assume
        there is just a single patch queue. */
     if (status_fn == NULL) {
-        status_fn = strdup(default_status);
+        status_fn = vcstrdup(default_status);
     }
 
     if (stat(status_fn, &statbuf) < 0) {
@@ -228,7 +218,7 @@ read_patch_name(vccontext_t* context, result_t* result)
     dump_hex(nodeid_s, result->full_revision, NODEID_LEN);
 
     if (strncmp(nodeid_s, last_line, NODEID_LEN * 2) == 0) {
-        result->patch = strdup(last_line + NODEID_LEN * 2 + 1);
+        result->patch = vcstrdup(last_line + NODEID_LEN * 2 + 1);
     }
 
 done:
@@ -236,28 +226,27 @@ done:
     free(last_line);
 }
 
-static void
-read_modified_unknown(vccontext_t* context, result_t* result)
+static void read_modified_unknown(vccontext_t *context, result_t *result)
 {
     // No easy way that we know to get the modified or unknown status
     // without forking an hg process. Replace this with a more efficient version
     // if you ever figure it out.
     if (!context->options->show_modified && !context->options->show_unknown) return;
 
-    char* argv[] = {"hg",      "--quiet",   "status",    "--modified",
+    char *argv[] = {"hg",      "--quiet",   "status",    "--modified",
                     "--added", "--removed", "--unknown", NULL};
     if (!context->options->show_unknown) {
         // asking hg to search for unknown files can be expensive, so
         // skip it unless the user wants it
         argv[6] = NULL;
     }
-    capture_t* capture = capture_child("hg", argv);
+    capture_t *capture = capture_child("hg", argv);
     if (capture == NULL) {
         debug("unable to execute 'hg status'");
         return;
     }
-    char* cstdout = capture->childout.buf;
-    for (char* ch = cstdout; *ch != 0; ch++) {
+    char *cstdout = capture->childout.buf;
+    for (char *ch = cstdout; *ch != 0; ch++) {
         if (ch == cstdout || *(ch - 1) == '\n') {
             // at start of output or start of line: look for ?, M, etc.
             if (context->options->show_unknown && *ch == '?') {
@@ -273,10 +262,9 @@ read_modified_unknown(vccontext_t* context, result_t* result)
     free_capture(capture);
 }
 
-static result_t*
-hg_get_info(vccontext_t* context)
+static result_t *hg_get_info(vccontext_t *context)
 {
-    result_t* result = init_result();
+    result_t *result = init_result();
     char buf[1024];
 
     // prefer bookmark because it tends to be more informative
@@ -310,8 +298,7 @@ hg_get_info(vccontext_t* context)
     return result;
 }
 
-vccontext_t*
-get_hg_context(options_t* options)
+vccontext_t *get_hg_context(options_t *options)
 {
     return init_context("hg", options, hg_probe, hg_get_info);
 }

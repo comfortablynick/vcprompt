@@ -40,7 +40,7 @@ int result_set_revision(result_t *result, const char *revision, int len)
 {
     if (result->revision) free(result->revision);
     if (len == -1)
-        result->revision = strdup(revision);
+        result->revision = vcstrdup(revision);
     else {
         result->revision = malloc(len + 1);
         if (!result->revision) return 0;
@@ -53,7 +53,7 @@ int result_set_revision(result_t *result, const char *revision, int len)
 int result_set_branch(result_t *result, const char *branch)
 {
     if (result->branch) free(result->branch);
-    result->branch = strdup(branch);
+    result->branch = vcstrdup(branch);
     return !!result->branch;
 }
 
@@ -85,6 +85,13 @@ void debug(char *fmt, ...)
     vfprintf(stderr, fmt, args);
     fputc('\n', stderr);
     va_end(args);
+}
+
+char *vcstrdup(const char *str)
+{
+    size_t len = strlen(str) + 1;
+    char *p = malloc(len);
+    return p ? memcpy(p, str, len) : NULL;
 }
 
 size_t strcpy_s(char *dst, const char *src, size_t dsize)

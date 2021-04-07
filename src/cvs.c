@@ -14,16 +14,11 @@
 
 #include "cvs.h"
 
-static int
-cvs_probe(vccontext_t* context)
-{
-    return isfile("CVS/Entries");
-}
+static int cvs_probe(vccontext_t *context) { return isfile("CVS/Entries"); }
 
-static result_t*
-cvs_get_info(vccontext_t* context)
+static result_t *cvs_get_info(vccontext_t *context)
 {
-    result_t* result = init_result();
+    result_t *result = init_result();
     char buf[1024];
 
     if (!read_first_line("CVS/Tag", buf, 1024)) {
@@ -42,8 +37,7 @@ cvs_get_info(vccontext_t* context)
     return result;
 }
 
-vccontext_t*
-get_cvs_context(options_t* options)
+vccontext_t *get_cvs_context(options_t *options)
 {
     return init_context("cvs", options, cvs_probe, cvs_get_info);
 }
