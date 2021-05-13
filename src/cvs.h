@@ -7,11 +7,7 @@
  * (at your option) any later version.
  */
 
-#ifndef CVS_H
-#define CVS_H
-
+#pragma once
 #include "common.h"
 
 vccontext_t *get_cvs_context(options_t *options);
-
-#endif

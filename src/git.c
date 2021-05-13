@@ -9,12 +9,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
 
 #include "capture.h"
 #include "common.h"
 #include "git.h"
-
 
 static int git_probe() { return isdir(".git"); }
 

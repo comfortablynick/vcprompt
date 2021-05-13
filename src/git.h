@@ -7,11 +7,7 @@
  * (at your option) any later version.
  */
 
-#ifndef GIT_H
-#define GIT_H
-
+#pragma once
 #include "common.h"
 
 vccontext_t *get_git_context(options_t *options);
-
-#endif

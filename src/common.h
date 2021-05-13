@@ -6,10 +6,8 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  */
+#pragma once
 #include <stdio.h>
-
-#ifndef VCPROMPT_H
-#define VCPROMPT_H
 
 /* What the user asked for (environment + command-line).
  */
@@ -139,5 +137,3 @@ void dump_hex(char *dest, const char *data, int datasize);
  * <= nchars.  Caller must allocate nchars+1 chars for dest.
  */
 void get_till_eol(char *dest, const char *src, int nchars);
-
-#endif

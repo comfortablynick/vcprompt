@@ -311,7 +311,7 @@ int main(int argc, char **argv)
         get_git_context(&options), get_hg_context(&options),     get_svn_context(&options),
         get_cvs_context(&options), get_fossil_context(&options),
     };
-    int num_contexts = sizeof(contexts) / sizeof(vccontext_t *);
+    size_t num_contexts = sizeof(contexts) / sizeof(vccontext_t *);
 
     result_t *result = NULL;
     vccontext_t *context = NULL;
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
     }
 
 done:
-    for (int i = 0; i < num_contexts; ++i) {
+    for (size_t i = 0; i < num_contexts; ++i) {
         free_context(contexts[i]);
     }
     if (options.format != NULL) {

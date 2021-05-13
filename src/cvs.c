@@ -7,11 +7,6 @@
  * (at your option) any later version.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "cvs.h"
 
 static int cvs_probe(vccontext_t *context) { return isfile("CVS/Entries"); }

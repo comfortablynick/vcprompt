@@ -7,11 +7,7 @@
  * (at your option) any later version.
  */
 
-#ifndef SVN_H
-#define SVN_H
-
+#pragma once
 #include "common.h"
 
 vccontext_t *get_svn_context(options_t *options);
-
-#endif

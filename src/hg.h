@@ -7,11 +7,7 @@
  * (at your option) any later version.
  */
 
-#ifndef HG_H
-#define HG_H
-
+#pragma once
 #include "common.h"
 
 vccontext_t *get_hg_context(options_t *options);
-
-#endif

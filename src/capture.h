@@ -1,6 +1,4 @@
-#ifndef CAPTURE_H
-#define CAPTURE_H
-
+#pragma once
 #include <sys/types.h>
 
 typedef struct
@@ -42,6 +40,4 @@ void free_capture(capture_t *capture);
  */
 int
 capture_failed(capture_t *capture);
-#endif
-
 #endif

@@ -7,11 +7,7 @@
  * (at your option) any later version.
  */
 
-#ifndef FOSSIL_H
-#define FOSSIL_H
-
+#pragma once
 #include "common.h"
 
 vccontext_t *get_fossil_context(options_t *options);
-
-#endif
